@@ -1,0 +1,7 @@
+## Interface: 70100
+## Title: Grid2 |cd1ff7d0aGuarm|r
+## Notes: Grid2 Guarm Assistant. Help on the dispel of volatile on mythic mode.
+## Author: Skamer
+## Version: 1.0 (beta)
+## Dependencies: Grid2
+Grid2GuarmVolatile.lua
