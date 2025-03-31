@@ -5,21 +5,23 @@ local GuarmVolatile = Grid2.statusPrototype:new("guarm-volatile")
 local Grid2 = Grid2
 
 -- Wow APi
-local GetSpellInfo = GetSpellInfo
-local GetSpellTexture = GetSpellTexture
-local GetSpellDescription = GetSpellDescription
+local GetSpellName = C_Spell.GetSpellName
+local GetSpellInfo = C_Spell.GetSpellInfo
+local GetSpellTexture = C_Spell.GetSpellTexture
+local GetSpellDescription = C_Spell.GetSpellDescription
 local GetTalentInfo = GetTalentInfo
 local GetSpecialization = GetSpecialization
 local UnitGUID = UnitGUID
+local FindAuraByName = AuraUtil.FindAuraByName
 
 -- data
-local RED_VOLATILE_NAME = GetSpellInfo(228744) -- 228744
-local BLUE_VOLATILE_NAME = GetSpellInfo(228810) -- 208065 -- 228810
-local PURPLE_VOLATILE_NAME = GetSpellInfo(228819) -- 228819
+local RED_VOLATILE_NAME = GetSpellName(228744) -- 228744
+local BLUE_VOLATILE_NAME = GetSpellName(228810) -- 208065 -- 228810
+local PURPLE_VOLATILE_NAME = GetSpellName(228819) -- 228819
 
-local RED_AURA_NAME = GetSpellInfo(228758) -- 228758
-local BLUE_AURA_NAME = GetSpellInfo(228768)
-local PURPLE_AURA_NAME = GetSpellInfo(228769) -- 228769
+local RED_AURA_NAME = GetSpellName(228758) -- 228758
+local BLUE_AURA_NAME = GetSpellName(228768)
+local PURPLE_AURA_NAME = GetSpellName(228769) -- 228769
 
 -- cache
 local AuraPlayers = {}
@@ -40,9 +42,11 @@ function GuarmVolatile:OnDisable()
   self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 end
 
-function GuarmVolatile:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, message, _, sourceGUID, sourceName, _, _, destGUID, destName, destFlags, destFlags2, ...)
+function GuarmVolatile:COMBAT_LOG_EVENT_UNFILTERED(event)
+  local timestamp, message, _, sourceGUID, sourceName, _, _, destGUID, destName, destFlags, destFlags2 = CombatLogGetCurrentEventInfo()
+
   if message == "SPELL_AURA_APPLIED" or message  == "SPELL_AURA_REFRESH" or msg == "SPELL_AURA_APPLIED_DOSE" then
-      local spellID, spellName = ...
+      local spellID, spellName = select(12, CombatLogGetCurrentEventInfo())
 
       if spellName == BLUE_VOLATILE_NAME then
         VolatilePlayers[destGUID] = BLUE_VOLATILE_NAME
@@ -59,7 +63,7 @@ function GuarmVolatile:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, message, _,
       end
       self:UpdateAllUnits()
   elseif message == "SPELL_AURA_REMOVED" or message == "SPELL_AURA_REMOVED_DOSE" then
-    local spellID, spellName = ...
+    local spellID, spellName = select(12, CombatLogGetCurrentEventInfo())
     if spellName == BLUE_VOLATILE_NAME then
       VolatilePlayers[destGUID] = nil
     elseif spellName == RED_VOLATILE_NAME then
@@ -101,7 +105,7 @@ function GuarmVolatile:GetExpirationTime(unit)
   local guid = UnitGUID(unit)
   local volatileName = VolatilePlayers[guid]
 
-  local _, _, _, _, _, _, expirationTime = UnitDebuff(unit, volatileName)
+  local _, _, _, _, _, _, expirationTime = FindAuraByName(unit, volatileName, "HARMFUL")
   return expirationTime
 end
 
@@ -109,7 +113,7 @@ function GuarmVolatile:GetDuration(unit)
   local guid = UnitGUID(unit)
   local volatileName = VolatilePlayers[guid]
 
-  local _, _, _, _, _, duration = UnitDebuff(unit, volatileName)
+  local _, _, _, _, _, duration = FindAuraByName(unit, volatileName, "HARMFUL")
   return duration
 end
 
