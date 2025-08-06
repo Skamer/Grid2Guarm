@@ -1,4 +1,10 @@
-# 1.1.2
+# 1.1.3
+
+- Bumped the toc version for 11.2.0
+
+---
+
+## 1.1.2
 
 - Bumped the toc version for 11.1.7
 
